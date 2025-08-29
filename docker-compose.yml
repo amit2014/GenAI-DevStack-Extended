@@ -1,0 +1,71 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    env_file: .env
+    volumes:
+      - ./:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - qdrant
+      - redis
+      - postgres
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  jobs:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.jobs
+    env_file: .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports: ["6333:6333"]
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.16.2
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:///mlflow.db
+      --default-artifact-root /mlruns
+    ports: ["5000:5000"]
+    volumes:
+      - mlruns:/mlruns
+
+  jupyter:
+    image: python:3.10-slim
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    command: >
+      sh -lc "pip install -r requirements.txt && jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root"
+    ports: ["8888:8888"]
+
+volumes:
+  qdrant_storage:
+  pgdata:
+  mlruns:
