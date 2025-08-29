@@ -141,3 +141,58 @@ make api    # run uvicorn dev server
 ## Notes
 
 - For Windows-only (no WSL), install Python 3.10+, Git, Docker Desktop, and run `pip install -r requirements.txt` in a PowerShell terminal. Some libraries (faiss, bitsandbytes) work best in WSL/Linux.
+
+
+# This extended environment supports:
+
+- **RAG & LLM frameworks**: Haystack, LlamaIndex, LangChain
+- **Providers**: OpenAI, Anthropic, Meta (HuggingFace Transformers), Mistral
+- **Vector DBs**: Pinecone, FAISS, Weaviate, Qdrant
+- **Embeddings**: OpenAI, HuggingFace Transformers, SentenceTransformers
+- **MLOps**: MLflow, Docker, Kubernetes client
+
+## Usage Examples
+
+### OpenAI & Anthropic
+
+```python
+from openai import OpenAI
+import anthropic
+
+client = OpenAI(api_key="sk-...")
+resp = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello from GenAI dev stack"}]
+)
+print(resp.choices[0].message.content)
+
+a_client = anthropic.Anthropic(api_key="sk-ant-...")
+msg = a_client.messages.create(
+    model="claude-3-sonnet-20240229",
+    max_tokens=200,
+    messages=[{"role": "user", "content": "Hello from Anthropic"}]
+)
+print(msg.content[0].text)
+```
+
+### Pinecone & Weaviate
+
+```python
+import pinecone, weaviate
+
+pinecone.init(api_key="pc-...")
+pc_index = pinecone.Index("genai")
+
+client = weaviate.Client("http://localhost:8080")
+print(client.is_ready())
+```
+
+### K8s Client
+
+```python
+from kubernetes import client, config
+
+config.load_kube_config()
+v1 = client.CoreV1Api()
+print([ns.metadata.name for ns in v1.list_namespace().items])
+```
