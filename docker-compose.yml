@@ -69,3 +69,9 @@ volumes:
   qdrant_storage:
   pgdata:
   mlruns:
+
+deploy:
+  resources:
+    reservations:
+      devices:
+        - capabilities: [gpu]
