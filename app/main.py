@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from app.providers.router import call_llm
 from .models.rag import RagQuery
 from .rag import pipeline
 
